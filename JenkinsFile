@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+    environment{
+        registry = "mayuresh9/length_conv_flask" 
+        registryCredential = 'My_docker_creds' 
+        dockerImage = ''
+    }
+
+    stages {
+        stage('Check out') {
+            steps {
+                echo 'Attempting to Check out'
+                git branch: 'main', credentialsId: '4af99ffb-105a-4c44-abd9-4dc8b5df373b', url: 'https://github.com/Mayuresh9/Devops_Demo.git'
+                echo 'Check out Successful'
+            }
+        }
+        stage('Build'){
+            steps{
+                script{
+                    echo 'Attempting to Build'
+                    bat 'ls'
+                    dockerImage = docker.build registry
+                    echo 'Build Sucessful'
+                }
+                
+            }
+        }
+        stage('Testing'){
+            steps{
+                echo 'Running Unit tests'
+                bat 'ls'
+                catchError(message: 'Unit Test failed') {
+                    bat 'python Unittests_Lconv.py'
+                }
+                echo 'Tested Successfully'
+            }
+        }
+        stage('deploy'){
+            steps{
+                script{
+                    echo 'Deploying using Docker Container'
+                    dockerImage.run(['-p 80:80'])
+                    echo 'Successfully Deployed'
+                }
+            }
+        }
+    }
+}
