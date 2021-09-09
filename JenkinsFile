@@ -19,7 +19,7 @@ pipeline {
                 script{
                     echo 'Attempting to Build'
                     bat 'ls'
-                    dockerImage = docker.build registry
+                    dockerImage = docker.build registry + ":$BUILD_NUMBER" 
                     echo 'Build Sucessful'
                 }
                 
@@ -29,9 +29,9 @@ pipeline {
             steps{
                 echo 'Running Unit tests'
                 bat 'ls'
-                catchError(message: 'Unit Test failed') {
-                    bat 'python Unittests_Lconv.py'
-                }
+                
+                bat 'python Unittests_Lconv.py'
+                
                 echo 'Tested Successfully'
             }
         }
@@ -39,6 +39,9 @@ pipeline {
             steps{
                 script{
                     echo 'Deploying using Docker Container'
+                    docker.withRegistry( '', registryCredential ) { 
+                        dockerImage.push() 
+                    }
                     dockerImage.run(['-p 80:80'])
                     echo 'Successfully Deployed'
                 }
