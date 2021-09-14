@@ -16,10 +16,13 @@ pipeline {
         }
         stage('Build'){
             steps{
+                powershell 'docker stop $(docker ps -a -q)'
+                powershell 'docker rm $(docker ps -a -q -f status=exited)'
+                echo 'Previous Containers Stopped and Removed'
                 script{
                     echo 'Attempting to Build'
                     bat 'ls'
-                    dockerImage = docker.build registry + ":$BUILD_NUMBER" 
+                    dockerImage = docker.build registry + ":$BUILD_NUMBER"
                     echo 'Build Sucessful'
                 }
                 
