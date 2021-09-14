@@ -4,8 +4,8 @@ pipeline {
         registry = "mayuresh9/length_conv_flask" 
         registryCredential = 'My_docker_creds' 
         dockerImage = ''
+        
     }
-
     stages {
         stage('Check out') {
             steps {
@@ -16,9 +16,11 @@ pipeline {
         }
         stage('Build'){
             steps{
-                powershell 'docker stop $(docker ps -a -q)'
-                powershell 'docker rm $(docker ps -a -q -f status=exited)'
-                echo 'Previous Containers Stopped and Removed'
+                    catchError(buildResult: 'SUCCESS', message: 'No running containers') {
+                    powershell 'docker stop $(docker ps -a -q)'
+                    powershell 'docker rm $(docker ps -a -q -f status=exited)'
+                    echo 'Previous Containers Stopped and Removed'
+                }
                 script{
                     echo 'Attempting to Build'
                     bat 'ls'
